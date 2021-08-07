@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wllfengshu.jetl.dao.EtlDao">
+
+	<select id="queryEtlNoAggregation" resultType="java.lang.String">
+		select kettle_name from etl_no_aggregation
+	</select>
+</mapper>

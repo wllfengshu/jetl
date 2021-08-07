@@ -1,0 +1,86 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+spring:
+  application:
+    name: jetl
+  flyway:
+    enabled: false
+    checkLocation: false
+  datasource:
+    # 注意：quartz使用的是输出数据库
+    url: ${mysql_dbUrl:jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&autoReconnect=true&useSSL=false&serverTimezone=GMT%2B8}
+    username: ${mysql_userName:root}
+    password: ${mysql_password:root}
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+  druid:
+    initial-size: 10
+    min-idle: 10
+    max-active: 20
+    max-wait: 60000
+    time-between-eviction-runs-millis: 60000
+    min-evictable-idle-time-millis: 300000
+    validation-query: SELECT 1
+    test-while-idle: true
+    test-on-borrow: false
+    test-on-return: false
+    pool-prepared-statements: true
+    max-pool-prepared-statement-per-connection-size: 40
+    filters: stat,wall,log4j
+    use-global-data-source-stat: true
+    connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: QuartzScheduler
+            instanceId: CLUSTERED
+          jobStore:
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: ETL_QRTZ_
+            isClustered: true
+            clusterCheckinInterval: 10000
+            useProperties: false
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 50
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+  influx:
+    url: ${influxdb_url:http://192.168.40.171:32099}
+    user: ${influxdb_user:cloud2}
+    password: ${influxdb_password:cloud2}
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml
+  type-aliases-package: cc.wellcloud.etl.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+mapper:
+  mappers: com.wllfengshu.jetl.utils.MapperUtil
+  not-empty: false
+  identity: MYSQL
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  params: count=countSql
+  support-methods-arguments: true
+logging:
+  level:
+    cc.wellcloud.etl.dao : debug
+# 开放健康检查接口
+management:
+  endpoints:
+    web:
+      base-path: /metrics
+      exposure:
+        include: 'prometheus,threaddump,heapdump'
+  metrics:
+    tags:
+      application: ${spring.application.name}
